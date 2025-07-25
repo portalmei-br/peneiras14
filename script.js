@@ -1,4 +1,4 @@
-// Dados simulados de peneiras de futebol - VERSÃO CORRIGIDA
+// Dados simulados de peneiras de futebol - VERSÃO REFINADA
 const peneirasData = [
     {
         id: 1,
@@ -121,48 +121,45 @@ let userLocation = null;
 let currentResults = [];
 let currentFilter = 'all';
 
+// Elementos DOM
+const cepInput = document.getElementById('cep-input');
+const getLocationBtn = document.getElementById('get-location-btn');
+const searchBtn = document.getElementById('search-btn');
+const resultsSection = document.getElementById('results');
+const resultsContainer = document.getElementById('results-container');
+const noResults = document.getElementById('no-results');
+const loadingOverlay = document.getElementById('loading-overlay');
+const loadingAddress = document.getElementById('loading-address');
+const suggestionBtns = document.querySelectorAll('.suggestion-btn');
+const filterBtns = document.querySelectorAll('.filter-btn');
+const backToTopBtn = document.getElementById('back-to-top');
+const navToggle = document.getElementById('nav-toggle');
+const navMenu = document.querySelector('.nav-menu');
+const header = document.querySelector('.header');
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
 function initializeApp() {
-    // Elementos DOM
-    const cepInput = document.getElementById('cep-input');
-    const getLocationBtn = document.getElementById('get-location-btn');
-    const searchBtn = document.getElementById('search-btn');
-    const suggestionBtns = document.querySelectorAll('.suggestion-btn');
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const backToTopBtn = document.getElementById('back-to-top');
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.querySelector('.nav-menu');
-
     // Event listeners para busca
-    if (searchBtn) {
-        searchBtn.addEventListener('click', handleSearch);
-    }
-    
-    if (cepInput) {
-        cepInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                handleSearch();
-            }
-        });
-    }
+    searchBtn.addEventListener('click', handleSearch);
+    cepInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    });
     
     // Event listener para obter localização atual
-    if (getLocationBtn) {
-        getLocationBtn.addEventListener('click', getCurrentLocation);
-    }
+    getLocationBtn.addEventListener('click', getCurrentLocation);
     
     // Event listeners para sugestões
     suggestionBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const location = this.getAttribute('data-location');
-            if (cepInput) {
-                cepInput.value = location;
-                handleSearch();
-            }
+            cepInput.value = location;
+            handleSearch();
         });
     });
     
@@ -202,61 +199,42 @@ function initializeApp() {
     
     // Configurar indicador de scroll
     setupScrollIndicator();
-    
-    // Adicionar estilos CSS dinamicamente
-    addDynamicStyles();
 }
 
 // Função para alternar menu mobile
 function toggleMobileMenu() {
-    const navMenu = document.querySelector('.nav-menu');
-    const navToggle = document.getElementById('nav-toggle');
-    
-    if (navMenu && navToggle) {
-        navMenu.classList.toggle('active');
-        navToggle.classList.toggle('active');
-    }
+    navMenu.classList.toggle('active');
+    navToggle.classList.toggle('active');
 }
 
 // Função para fechar menu mobile
 function closeMobileMenu() {
-    const navMenu = document.querySelector('.nav-menu');
-    const navToggle = document.getElementById('nav-toggle');
-    
-    if (navMenu && navToggle) {
-        navMenu.classList.remove('active');
-        navToggle.classList.remove('active');
-    }
+    navMenu.classList.remove('active');
+    navToggle.classList.remove('active');
 }
 
 // Função para lidar com scroll
 function handleScroll() {
     const scrollY = window.scrollY;
-    const header = document.querySelector('.header');
-    const backToTopBtn = document.getElementById('back-to-top');
     
     // Header com efeito de scroll
-    if (header) {
-        if (scrollY > 100) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
+    if (scrollY > 100) {
+        header.classList.add('scrolled');
+    } else {
+        header.classList.remove('scrolled');
     }
     
     // Botão voltar ao topo
-    if (backToTopBtn) {
-        if (scrollY > 500) {
-            backToTopBtn.style.display = 'flex';
-            backToTopBtn.style.opacity = '1';
-        } else {
-            backToTopBtn.style.opacity = '0';
-            setTimeout(() => {
-                if (window.scrollY <= 500) {
-                    backToTopBtn.style.display = 'none';
-                }
-            }, 300);
-        }
+    if (scrollY > 500) {
+        backToTopBtn.style.display = 'flex';
+        backToTopBtn.style.opacity = '1';
+    } else {
+        backToTopBtn.style.opacity = '0';
+        setTimeout(() => {
+            if (window.scrollY <= 500) {
+                backToTopBtn.style.display = 'none';
+            }
+        }, 300);
     }
 }
 
@@ -273,12 +251,9 @@ function setupScrollIndicator() {
     const scrollArrow = document.querySelector('.scroll-arrow');
     if (scrollArrow) {
         scrollArrow.addEventListener('click', () => {
-            const comoFunciona = document.getElementById('como-funciona');
-            if (comoFunciona) {
-                comoFunciona.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
+            document.getElementById('como-funciona').scrollIntoView({
+                behavior: 'smooth'
+            });
         });
     }
 }
@@ -321,18 +296,13 @@ function animateNumber(element, target) {
 
 // Função para obter localização atual do usuário
 function getCurrentLocation() {
-    const getLocationBtn = document.getElementById('get-location-btn');
-    const cepInput = document.getElementById('cep-input');
-    
     if (!navigator.geolocation) {
         showNotification('Geolocalização não é suportada pelo seu navegador', 'error');
         return;
     }
     
     showLoading();
-    if (getLocationBtn) {
-        getLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    }
+    getLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     
     navigator.geolocation.getCurrentPosition(
         function(position) {
@@ -344,28 +314,20 @@ function getCurrentLocation() {
             // Simular busca de endereço reverso
             reverseGeocode(userLocation.lat, userLocation.lng)
                 .then(address => {
-                    if (cepInput) {
-                        cepInput.value = address;
-                    }
+                    cepInput.value = address;
                     hideLoading();
-                    if (getLocationBtn) {
-                        getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
-                    }
+                    getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
                     handleSearch();
                 })
                 .catch(error => {
                     hideLoading();
-                    if (getLocationBtn) {
-                        getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
-                    }
+                    getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
                     showNotification('Erro ao obter endereço', 'error');
                 });
         },
         function(error) {
             hideLoading();
-            if (getLocationBtn) {
-                getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
-            }
+            getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
             
             let message = 'Erro ao obter localização';
             switch(error.code) {
@@ -435,9 +397,6 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
 
 // Função principal de busca
 async function handleSearch() {
-    const cepInput = document.getElementById('cep-input');
-    if (!cepInput) return;
-    
     const cep = cepInput.value.replace(/\D/g, '');
 
     if (cep.length !== 8) {
@@ -460,16 +419,8 @@ async function handleSearch() {
 
         const address = `${data.localidade}, ${data.uf}`;
         const neighborhood = data.bairro ? `, ${data.bairro}` : '';
-        
-        const loadingAddress = document.getElementById('loading-address');
-        const loadingNeighborhood = document.getElementById('loading-neighborhood');
-        
-        if (loadingAddress) {
-            loadingAddress.textContent = `Buscando peneiras próximas a ${address}`;
-        }
-        if (loadingNeighborhood) {
-            loadingNeighborhood.textContent = `Bairro: ${data.bairro || 'Não informado'}`;
-        }
+        loadingAddress.textContent = `Buscando peneiras próximas a ${address}`;
+        document.getElementById('loading-neighborhood').textContent = `Bairro: ${data.bairro || 'Não informado'}`;
 
         // Simular delay de busca
         setTimeout(() => {
@@ -542,7 +493,6 @@ function geocodeLocation(location) {
 
 // Função para definir filtro ativo
 function setActiveFilter(filter) {
-    const filterBtns = document.querySelectorAll('.filter-btn');
     filterBtns.forEach(btn => {
         btn.classList.remove('active');
         if (btn.getAttribute('data-filter') === filter) {
@@ -573,12 +523,6 @@ function applyFilter(filter) {
 
 // Função para exibir resultados
 function displayResults(results) {
-    const resultsSection = document.getElementById('results');
-    const resultsContainer = document.getElementById('results-container');
-    const noResults = document.getElementById('no-results');
-    
-    if (!resultsSection || !resultsContainer || !noResults) return;
-    
     resultsSection.style.display = 'block';
     resultsSection.scrollIntoView({ behavior: 'smooth' });
     
@@ -603,7 +547,7 @@ function displayResults(results) {
     });
 }
 
-// FUNÇÃO PRINCIPAL PARA CRIAR CARD DE RESULTADO COM BOTÃO "QUERO PARTICIPAR"
+// FUNÇÃO REFINADA PARA CRIAR CARD DE RESULTADO - DESIGN PROFISSIONAL COM BOTÃO "QUERO PARTICIPAR"
 function createResultCard(peneira) {
     const card = document.createElement('div');
     card.className = 'result-card';
@@ -614,7 +558,7 @@ function createResultCard(peneira) {
         `${Math.round(peneira.distancia * 1000)}m` : 
         `${peneira.distancia}km`;
     
-    // Determinar status e informações de vagas
+    // Determinar status e informações de vagas de forma mais elegante
     const statusInfo = getStatusInfo(peneira);
     const vagasInfo = getVagasInfo(peneira);
     const prazoInfo = getPrazoInfo(peneira);
@@ -674,7 +618,7 @@ function createResultCard(peneira) {
     return card;
 }
 
-// Função para obter informações de status
+// Função refinada para obter informações de status
 function getStatusInfo(peneira) {
     if (peneira.status === 'encerrada') {
         return {
@@ -699,7 +643,7 @@ function getStatusInfo(peneira) {
     };
 }
 
-// Função para obter informações de vagas
+// Função refinada para obter informações de vagas
 function getVagasInfo(peneira) {
     if (peneira.status !== 'aberta') {
         return { html: '' };
@@ -722,7 +666,7 @@ function getVagasInfo(peneira) {
     };
 }
 
-// Função para obter informações de prazo
+// Função refinada para obter informações de prazo
 function getPrazoInfo(peneira) {
     if (peneira.status !== 'aberta') {
         return { html: '' };
@@ -779,7 +723,7 @@ function formatDate(dateString) {
     return date.toLocaleDateString('pt-BR', options);
 }
 
-// FUNÇÃO PRINCIPAL: Participar da peneira
+// NOVA FUNÇÃO: Participar da peneira - substitui as funções openDirections e shareResult
 function participateInTryout(peneiraId) {
     const peneira = peneirasData.find(p => p.id === peneiraId);
     
@@ -914,7 +858,7 @@ function closeParticipationModal() {
     }
 }
 
-// Função para abrir direções
+// Função para abrir direções (mantida para uso no modal)
 function openDirections(endereco) {
     const encodedAddress = encodeURIComponent(endereco);
     const url = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
@@ -940,7 +884,7 @@ function contactClub(contato) {
     showNotification('Abrindo contato...', 'info');
 }
 
-// Função para compartilhar resultado
+// Função para compartilhar resultado (mantida e melhorada)
 function shareResult(peneiraId) {
     const peneira = peneirasData.find(p => p.id === peneiraId);
     
@@ -983,25 +927,16 @@ function shareResult(peneiraId) {
 
 // Função para mostrar loading
 function showLoading(isCepSearch = false) {
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const loadingAddress = document.getElementById('loading-address');
-    
-    if (!isCepSearch && loadingAddress) {
+    if (!isCepSearch) {
         loadingAddress.textContent = 'Buscando peneiras...';
     }
-    
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'flex';
-    }
+    loadingOverlay.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
 
 // Função para esconder loading
 function hideLoading() {
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) {
-        loadingOverlay.style.display = 'none';
-    }
+    loadingOverlay.style.display = 'none';
     document.body.style.overflow = 'auto';
 }
 
@@ -1105,87 +1040,505 @@ function setupScrollAnimations() {
     });
 }
 
-// Função para adicionar estilos CSS dinamicamente
-function addDynamicStyles() {
-    const additionalStyles = `
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-        
-        .notification-content {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 500;
-        }
-        
-        .notification-close {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .notification-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .result-card {
+// Adicionar estilos CSS para animações, notificações e modal via JavaScript
+const additionalStyles = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        .result-card.animate-fade-in-up {
+        to {
+            transform: translateX(0);
             opacity: 1;
-            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .notification-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .notification-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Estilos para o novo botão "Quero Participar" */
+    .btn-participate {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: var(--text-light);
+        border: none;
+        border-radius: var(--radius-md);
+        padding: var(--space-md) var(--space-lg);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        font-size: var(--font-size-sm);
+        box-shadow: 0 2px 8px rgba(27, 94, 32, 0.3);
+        width: 100%;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-participate::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-participate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(27, 94, 32, 0.4);
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-lighter) 100%);
+    }
+    
+    .btn-participate:hover::before {
+        left: 100%;
+    }
+    
+    .btn-participate:active {
+        transform: translateY(0);
+    }
+    
+    /* Estilos para o modal de participação */
+    .participation-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .participation-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+        position: relative;
+        background: var(--bg-primary);
+        border-radius: var(--radius-2xl);
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+        transform: scale(0.9) translateY(20px);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .participation-modal.show .modal-content {
+        transform: scale(1) translateY(0);
+    }
+    
+    .modal-header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-lg);
+        padding: var(--space-2xl);
+        border-bottom: 1px solid var(--border-light);
+        position: relative;
+    }
+    
+    .modal-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+        font-size: var(--font-size-2xl);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .modal-header h2 {
+        flex: 1;
+        font-size: var(--font-size-3xl);
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: var(--space-sm);
+        border-radius: var(--radius-sm);
+        transition: all var(--transition-fast);
+        font-size: var(--font-size-lg);
+    }
+    
+    .modal-close:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    
+    .modal-body {
+        padding: var(--space-2xl);
+    }
+    
+    .peneira-info h3 {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-xs);
+    }
+    
+    .clube-name {
+        font-size: var(--font-size-lg);
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: var(--space-2xl);
+    }
+    
+    .info-grid {
+        display: grid;
+        gap: var(--space-lg);
+        margin-bottom: var(--space-2xl);
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-lg);
+        padding: var(--space-lg);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .info-item i {
+        color: var(--primary-color);
+        font-size: var(--font-size-lg);
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    
+    .info-item div {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        flex: 1;
+    }
+    
+    .info-item .label {
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .info-item .value {
+        font-size: var(--font-size-base);
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: var(--space-md);
+        margin-bottom: var(--space-2xl);
+    }
+    
+    .btn-directions,
+    .btn-contact,
+    .btn-share {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        border-radius: var(--radius-md);
+        padding: var(--space-md) var(--space-lg);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        font-size: var(--font-size-sm);
+        justify-content: center;
+    }
+    
+    .btn-directions:hover,
+    .btn-contact:hover,
+    .btn-share:hover {
+        background: var(--primary-color);
+        color: var(--text-light);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(27, 94, 32, 0.3);
+    }
+    
+    .important-note {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-md);
+        padding: var(--space-lg);
+        background: linear-gradient(135deg, rgba(33, 150, 243, 0.05) 0%, rgba(25, 118, 210, 0.05) 100%);
+        border: 1px solid rgba(33, 150, 243, 0.2);
+        border-radius: var(--radius-lg);
+        border-left: 4px solid #2196F3;
+    }
+    
+    .important-note i {
+        color: #2196F3;
+        font-size: var(--font-size-lg);
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    
+    .important-note p {
+        color: var(--text-secondary);
+        line-height: var(--leading-relaxed);
+        margin: 0;
+        font-size: var(--font-size-sm);
+    }
+    
+    /* Melhorias para animações de entrada */
+    .result-card {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .result-card.animate-fade-in-up {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Smooth scroll para navegação */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Melhorias para focus */
+    .search-input:focus,
+    .btn-primary:focus,
+    .btn-secondary:focus,
+    .btn-participate:focus,
+    .filter-btn:focus,
+    .suggestion-btn:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+    
+    /* Animação para loading */
+    .loading-overlay {
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* Melhorias para hover states */
+    .result-card:hover .card-title {
+        color: var(--primary-color);
+    }
+    
+    .step-card:hover .step-icon {
+        transform: scale(1.05);
+    }
+    
+    .feature-card:hover .feature-icon {
+        transform: scale(1.05);
+    }
+    
+    /* Animação para estatísticas */
+    .stat-item:hover .stat-icon {
+        transform: scale(1.1);
+    }
+    
+    /* Responsividade para modal */
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 95%;
+            margin: var(--space-lg);
         }
         
-        @media (max-width: 768px) {
-            .notification {
-                right: 10px !important;
-                left: 10px !important;
-                max-width: none !important;
-                min-width: auto !important;
-            }
+        .modal-header {
+            padding: var(--space-lg);
+            flex-direction: column;
+            text-align: center;
         }
-    `;
+        
+        .modal-header h2 {
+            font-size: var(--font-size-2xl);
+        }
+        
+        .modal-body {
+            padding: var(--space-lg);
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+        }
+        
+        .info-item {
+            padding: var(--space-md);
+        }
+        
+        .notification {
+            right: 10px !important;
+            left: 10px !important;
+            max-width: none !important;
+            min-width: auto !important;
+        }
+        
+        .btn-participate {
+            padding: var(--space-sm) var(--space-md);
+            font-size: var(--font-size-xs);
+        }
+    }
     
-    // Adicionar estilos ao documento
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = additionalStyles;
-    document.head.appendChild(styleSheet);
+    @media (max-width: 480px) {
+        .modal-icon {
+            width: 50px;
+            height: 50px;
+            font-size: var(--font-size-xl);
+        }
+        
+        .modal-header h2 {
+            font-size: var(--font-size-xl);
+        }
+        
+        .peneira-info h3 {
+            font-size: var(--font-size-xl);
+        }
+        
+        .info-item {
+            padding: var(--space-sm);
+        }
+        
+        .info-item .label {
+            font-size: 0.7rem;
+        }
+        
+        .info-item .value {
+            font-size: var(--font-size-sm);
+        }
+        
+        .btn-directions,
+        .btn-contact,
+        .btn-share {
+            padding: var(--space-sm);
+            font-size: var(--font-size-xs);
+        }
+        
+        .btn-participate {
+            padding: var(--space-xs) var(--space-sm);
+            font-size: 0.7rem;
+        }
+    }
+`;
+
+// Adicionar estilos ao documento
+const styleSheet = document.createElement('style');
+styleSheet.textContent = additionalStyles;
+document.head.appendChild(styleSheet);
+
+// Função para melhorar performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Aplicar debounce ao scroll
+const debouncedHandleScroll = debounce(handleScroll, 10);
+window.removeEventListener('scroll', handleScroll);
+window.addEventListener('scroll', debouncedHandleScroll);
+
+// Preload de imagens importantes
+function preloadImages() {
+    const images = [
+        // Adicionar URLs de imagens importantes aqui se houver
+    ];
+    
+    images.forEach(src => {
+        const img = new Image();
+        img.src = src;
+    });
+}
+
+// Chamar preload quando a página carregar
+window.addEventListener('load', preloadImages);
+
+// Service Worker para cache (opcional)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // Registrar service worker aqui se necessário
+    });
 }
 
 // Melhorias de acessibilidade
 document.addEventListener('keydown', function(e) {
     // Esc para fechar menu mobile
-    const navMenu = document.querySelector('.nav-menu');
-    if (e.key === 'Escape' && navMenu && navMenu.classList.contains('active')) {
+    if (e.key === 'Escape' && navMenu.classList.contains('active')) {
         closeMobileMenu();
     }
     
@@ -1208,28 +1561,12 @@ function isMobile() {
 // Ajustar comportamento baseado no dispositivo
 function adjustForDevice() {
     if (isMobile()) {
+        // Ajustes específicos para mobile
         document.body.classList.add('mobile-device');
     } else {
         document.body.classList.remove('mobile-device');
     }
 }
-
-// Função para melhorar performance
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Aplicar debounce ao scroll
-const debouncedHandleScroll = debounce(handleScroll, 10);
-window.addEventListener('scroll', debouncedHandleScroll);
 
 // Chamar na inicialização e no resize
 adjustForDevice();
