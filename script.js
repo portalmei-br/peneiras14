@@ -808,11 +808,11 @@ function createParticipationModal(peneira) {
                             </div>
                         </div>
                         
-                        <div class="info-item">
+                        <div class="">
                             <i class="fas fa-clock"></i>
                             <div>
-                                <span class="label">Prazo de Inscrição</span>
-                                <span class="value">${formatDate(peneira.prazoInscricao)}</span>
+                                <span class="label"></span>
+                                <span class="value"></span>
                             </div>
                         </div>
                     </div>
