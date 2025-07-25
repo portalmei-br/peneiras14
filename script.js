@@ -1,4 +1,4 @@
-// Dados simulados de peneiras de futebol - VERSÃO REFINADA
+// Dados simulados de peneiras de futebol - VERSÃO CORRIGIDA
 const peneirasData = [
     {
         id: 1,
@@ -121,45 +121,48 @@ let userLocation = null;
 let currentResults = [];
 let currentFilter = 'all';
 
-// Elementos DOM
-const cepInput = document.getElementById('cep-input');
-const getLocationBtn = document.getElementById('get-location-btn');
-const searchBtn = document.getElementById('search-btn');
-const resultsSection = document.getElementById('results');
-const resultsContainer = document.getElementById('results-container');
-const noResults = document.getElementById('no-results');
-const loadingOverlay = document.getElementById('loading-overlay');
-const loadingAddress = document.getElementById('loading-address');
-const suggestionBtns = document.querySelectorAll('.suggestion-btn');
-const filterBtns = document.querySelectorAll('.filter-btn');
-const backToTopBtn = document.getElementById('back-to-top');
-const navToggle = document.getElementById('nav-toggle');
-const navMenu = document.querySelector('.nav-menu');
-const header = document.querySelector('.header');
-
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
 function initializeApp() {
+    // Elementos DOM
+    const cepInput = document.getElementById('cep-input');
+    const getLocationBtn = document.getElementById('get-location-btn');
+    const searchBtn = document.getElementById('search-btn');
+    const suggestionBtns = document.querySelectorAll('.suggestion-btn');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const backToTopBtn = document.getElementById('back-to-top');
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.querySelector('.nav-menu');
+
     // Event listeners para busca
-    searchBtn.addEventListener('click', handleSearch);
-    cepInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
-    });
+    if (searchBtn) {
+        searchBtn.addEventListener('click', handleSearch);
+    }
+    
+    if (cepInput) {
+        cepInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSearch();
+            }
+        });
+    }
     
     // Event listener para obter localização atual
-    getLocationBtn.addEventListener('click', getCurrentLocation);
+    if (getLocationBtn) {
+        getLocationBtn.addEventListener('click', getCurrentLocation);
+    }
     
     // Event listeners para sugestões
     suggestionBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const location = this.getAttribute('data-location');
-            cepInput.value = location;
-            handleSearch();
+            if (cepInput) {
+                cepInput.value = location;
+                handleSearch();
+            }
         });
     });
     
@@ -199,42 +202,61 @@ function initializeApp() {
     
     // Configurar indicador de scroll
     setupScrollIndicator();
+    
+    // Adicionar estilos CSS dinamicamente
+    addDynamicStyles();
 }
 
 // Função para alternar menu mobile
 function toggleMobileMenu() {
-    navMenu.classList.toggle('active');
-    navToggle.classList.toggle('active');
+    const navMenu = document.querySelector('.nav-menu');
+    const navToggle = document.getElementById('nav-toggle');
+    
+    if (navMenu && navToggle) {
+        navMenu.classList.toggle('active');
+        navToggle.classList.toggle('active');
+    }
 }
 
 // Função para fechar menu mobile
 function closeMobileMenu() {
-    navMenu.classList.remove('active');
-    navToggle.classList.remove('active');
+    const navMenu = document.querySelector('.nav-menu');
+    const navToggle = document.getElementById('nav-toggle');
+    
+    if (navMenu && navToggle) {
+        navMenu.classList.remove('active');
+        navToggle.classList.remove('active');
+    }
 }
 
 // Função para lidar com scroll
 function handleScroll() {
     const scrollY = window.scrollY;
+    const header = document.querySelector('.header');
+    const backToTopBtn = document.getElementById('back-to-top');
     
     // Header com efeito de scroll
-    if (scrollY > 100) {
-        header.classList.add('scrolled');
-    } else {
-        header.classList.remove('scrolled');
+    if (header) {
+        if (scrollY > 100) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
     }
     
     // Botão voltar ao topo
-    if (scrollY > 500) {
-        backToTopBtn.style.display = 'flex';
-        backToTopBtn.style.opacity = '1';
-    } else {
-        backToTopBtn.style.opacity = '0';
-        setTimeout(() => {
-            if (window.scrollY <= 500) {
-                backToTopBtn.style.display = 'none';
-            }
-        }, 300);
+    if (backToTopBtn) {
+        if (scrollY > 500) {
+            backToTopBtn.style.display = 'flex';
+            backToTopBtn.style.opacity = '1';
+        } else {
+            backToTopBtn.style.opacity = '0';
+            setTimeout(() => {
+                if (window.scrollY <= 500) {
+                    backToTopBtn.style.display = 'none';
+                }
+            }, 300);
+        }
     }
 }
 
@@ -251,9 +273,12 @@ function setupScrollIndicator() {
     const scrollArrow = document.querySelector('.scroll-arrow');
     if (scrollArrow) {
         scrollArrow.addEventListener('click', () => {
-            document.getElementById('como-funciona').scrollIntoView({
-                behavior: 'smooth'
-            });
+            const comoFunciona = document.getElementById('como-funciona');
+            if (comoFunciona) {
+                comoFunciona.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
         });
     }
 }
@@ -296,13 +321,18 @@ function animateNumber(element, target) {
 
 // Função para obter localização atual do usuário
 function getCurrentLocation() {
+    const getLocationBtn = document.getElementById('get-location-btn');
+    const cepInput = document.getElementById('cep-input');
+    
     if (!navigator.geolocation) {
         showNotification('Geolocalização não é suportada pelo seu navegador', 'error');
         return;
     }
     
     showLoading();
-    getLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    if (getLocationBtn) {
+        getLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
     
     navigator.geolocation.getCurrentPosition(
         function(position) {
@@ -314,20 +344,28 @@ function getCurrentLocation() {
             // Simular busca de endereço reverso
             reverseGeocode(userLocation.lat, userLocation.lng)
                 .then(address => {
-                    cepInput.value = address;
+                    if (cepInput) {
+                        cepInput.value = address;
+                    }
                     hideLoading();
-                    getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
+                    if (getLocationBtn) {
+                        getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
+                    }
                     handleSearch();
                 })
                 .catch(error => {
                     hideLoading();
-                    getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
+                    if (getLocationBtn) {
+                        getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
+                    }
                     showNotification('Erro ao obter endereço', 'error');
                 });
         },
         function(error) {
             hideLoading();
-            getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
+            if (getLocationBtn) {
+                getLocationBtn.innerHTML = '<i class="fas fa-crosshairs"></i>';
+            }
             
             let message = 'Erro ao obter localização';
             switch(error.code) {
@@ -397,6 +435,9 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
 
 // Função principal de busca
 async function handleSearch() {
+    const cepInput = document.getElementById('cep-input');
+    if (!cepInput) return;
+    
     const cep = cepInput.value.replace(/\D/g, '');
 
     if (cep.length !== 8) {
@@ -419,8 +460,16 @@ async function handleSearch() {
 
         const address = `${data.localidade}, ${data.uf}`;
         const neighborhood = data.bairro ? `, ${data.bairro}` : '';
-        loadingAddress.textContent = `Buscando peneiras próximas a ${address}`;
-        document.getElementById('loading-neighborhood').textContent = `Bairro: ${data.bairro || 'Não informado'}`;
+        
+        const loadingAddress = document.getElementById('loading-address');
+        const loadingNeighborhood = document.getElementById('loading-neighborhood');
+        
+        if (loadingAddress) {
+            loadingAddress.textContent = `Buscando peneiras próximas a ${address}`;
+        }
+        if (loadingNeighborhood) {
+            loadingNeighborhood.textContent = `Bairro: ${data.bairro || 'Não informado'}`;
+        }
 
         // Simular delay de busca
         setTimeout(() => {
@@ -493,6 +542,7 @@ function geocodeLocation(location) {
 
 // Função para definir filtro ativo
 function setActiveFilter(filter) {
+    const filterBtns = document.querySelectorAll('.filter-btn');
     filterBtns.forEach(btn => {
         btn.classList.remove('active');
         if (btn.getAttribute('data-filter') === filter) {
@@ -523,6 +573,12 @@ function applyFilter(filter) {
 
 // Função para exibir resultados
 function displayResults(results) {
+    const resultsSection = document.getElementById('results');
+    const resultsContainer = document.getElementById('results-container');
+    const noResults = document.getElementById('no-results');
+    
+    if (!resultsSection || !resultsContainer || !noResults) return;
+    
     resultsSection.style.display = 'block';
     resultsSection.scrollIntoView({ behavior: 'smooth' });
     
@@ -547,7 +603,7 @@ function displayResults(results) {
     });
 }
 
-// FUNÇÃO REFINADA PARA CRIAR CARD DE RESULTADO - DESIGN PROFISSIONAL
+// FUNÇÃO PRINCIPAL PARA CRIAR CARD DE RESULTADO COM BOTÃO "QUERO PARTICIPAR"
 function createResultCard(peneira) {
     const card = document.createElement('div');
     card.className = 'result-card';
@@ -558,7 +614,7 @@ function createResultCard(peneira) {
         `${Math.round(peneira.distancia * 1000)}m` : 
         `${peneira.distancia}km`;
     
-    // Determinar status e informações de vagas de forma mais elegante
+    // Determinar status e informações de vagas
     const statusInfo = getStatusInfo(peneira);
     const vagasInfo = getVagasInfo(peneira);
     const prazoInfo = getPrazoInfo(peneira);
@@ -599,20 +655,14 @@ function createResultCard(peneira) {
         
         <div class="card-actions">
             ${peneira.status === 'aberta' ? `
-                <button class="btn-primary" onclick="openDirections('${peneira.endereco}')">
-                    <i class="fas fa-route"></i>
-                    <span>Como Chegar</span>
-                </button>
-                <button class="btn-secondary" onclick="shareResult(${peneira.id})">
-                    <i class="fas fa-share-alt"></i>
+                <button class="btn-participate" onclick="participateInTryout(${peneira.id})">
+                    <i class="fas fa-futbol"></i>
+                    <span>Quero Participar</span>
                 </button>
             ` : `
                 <button class="btn-disabled" disabled>
                     <i class="fas fa-lock"></i>
                     <span>Encerrada</span>
-                </button>
-                <button class="btn-secondary" onclick="shareResult(${peneira.id})">
-                    <i class="fas fa-share-alt"></i>
                 </button>
             `}
         </div>
@@ -624,7 +674,7 @@ function createResultCard(peneira) {
     return card;
 }
 
-// Função refinada para obter informações de status
+// Função para obter informações de status
 function getStatusInfo(peneira) {
     if (peneira.status === 'encerrada') {
         return {
@@ -649,7 +699,7 @@ function getStatusInfo(peneira) {
     };
 }
 
-// Função refinada para obter informações de vagas
+// Função para obter informações de vagas
 function getVagasInfo(peneira) {
     if (peneira.status !== 'aberta') {
         return { html: '' };
@@ -672,7 +722,7 @@ function getVagasInfo(peneira) {
     };
 }
 
-// Função refinada para obter informações de prazo
+// Função para obter informações de prazo
 function getPrazoInfo(peneira) {
     if (peneira.status !== 'aberta') {
         return { html: '' };
@@ -729,11 +779,165 @@ function formatDate(dateString) {
     return date.toLocaleDateString('pt-BR', options);
 }
 
+// FUNÇÃO PRINCIPAL: Participar da peneira
+function participateInTryout(peneiraId) {
+    const peneira = peneirasData.find(p => p.id === peneiraId);
+    
+    if (!peneira) {
+        showNotification('Peneira não encontrada.', 'error');
+        return;
+    }
+    
+    // Criar modal de participação
+    const modal = createParticipationModal(peneira);
+    document.body.appendChild(modal);
+    
+    // Mostrar modal com animação
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+    
+    // Prevenir scroll do body
+    document.body.style.overflow = 'hidden';
+}
+
+// Função para criar modal de participação
+function createParticipationModal(peneira) {
+    const modal = document.createElement('div');
+    modal.className = 'participation-modal';
+    modal.innerHTML = `
+        <div class="modal-backdrop" onclick="closeParticipationModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-futbol"></i>
+                </div>
+                <h2>Quero Participar!</h2>
+                <button class="modal-close" onclick="closeParticipationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="peneira-info">
+                    <h3>${peneira.titulo}</h3>
+                    <p class="clube-name">${peneira.clube}</p>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <div>
+                                <span class="label">Data e Horário</span>
+                                <span class="value">${formatDate(peneira.data)} às ${peneira.horario}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <span class="label">Local</span>
+                                <span class="value">${peneira.endereco}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <span class="label">Categoria</span>
+                                <span class="value">${peneira.categoria}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-clipboard-list"></i>
+                            <div>
+                                <span class="label">Requisitos</span>
+                                <span class="value">${peneira.requisitos}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <span class="label">Contato</span>
+                                <span class="value">${peneira.contato}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <span class="label">Prazo de Inscrição</span>
+                                <span class="value">${formatDate(peneira.prazoInscricao)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn-directions" onclick="openDirections('${peneira.endereco}')">
+                        <i class="fas fa-route"></i>
+                        <span>Como Chegar</span>
+                    </button>
+                    
+                    <button class="btn-contact" onclick="contactClub('${peneira.contato}')">
+                        <i class="fas fa-phone"></i>
+                        <span>Entrar em Contato</span>
+                    </button>
+                    
+                    <button class="btn-share" onclick="shareResult(${peneira.id})">
+                        <i class="fas fa-share-alt"></i>
+                        <span>Compartilhar</span>
+                    </button>
+                </div>
+                
+                <div class="important-note">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Lembre-se de entrar em contato com o clube para confirmar sua participação e obter informações sobre documentos necessários.</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return modal;
+}
+
+// Função para fechar modal de participação
+function closeParticipationModal() {
+    const modal = document.querySelector('.participation-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.remove();
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
+}
+
 // Função para abrir direções
 function openDirections(endereco) {
     const encodedAddress = encodeURIComponent(endereco);
     const url = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
     window.open(url, '_blank');
+    showNotification('Abrindo direções no Google Maps...', 'info');
+}
+
+// Função para entrar em contato com o clube
+function contactClub(contato) {
+    // Remover caracteres não numéricos do telefone
+    const phoneNumber = contato.replace(/\D/g, '');
+    
+    // Criar URL do WhatsApp
+    const whatsappUrl = `https://wa.me/55${phoneNumber}?text=Olá! Gostaria de obter mais informações sobre a peneira de futebol.`;
+    
+    // Tentar abrir WhatsApp, senão abrir discador
+    if (navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i)) {
+        window.open(whatsappUrl, '_blank');
+    } else {
+        window.open(`tel:${contato}`, '_blank');
+    }
+    
+    showNotification('Abrindo contato...', 'info');
 }
 
 // Função para compartilhar resultado
@@ -748,7 +952,7 @@ function shareResult(peneiraId) {
         }).catch(err => console.log('Erro ao compartilhar:', err));
     } else {
         // Fallback para navegadores que não suportam Web Share API
-        const text = `Peneira: ${peneira.titulo} - ${peneira.clube}\nData: ${formatDate(peneira.data)} às ${peneira.horario}\nLocal: ${peneira.endereco}\n\nVeja mais em: ${window.location.href}`;
+        const text = `🏆 Peneira: ${peneira.titulo}\n⚽ Clube: ${peneira.clube}\n📅 Data: ${formatDate(peneira.data)} às ${peneira.horario}\n📍 Local: ${peneira.endereco}\n\n🔗 Veja mais em: ${window.location.href}`;
         
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => {
@@ -779,16 +983,25 @@ function shareResult(peneiraId) {
 
 // Função para mostrar loading
 function showLoading(isCepSearch = false) {
-    if (!isCepSearch) {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const loadingAddress = document.getElementById('loading-address');
+    
+    if (!isCepSearch && loadingAddress) {
         loadingAddress.textContent = 'Buscando peneiras...';
     }
-    loadingOverlay.style.display = 'flex';
+    
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+    }
     document.body.style.overflow = 'hidden';
 }
 
 // Função para esconder loading
 function hideLoading() {
-    loadingOverlay.style.display = 'none';
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
     document.body.style.overflow = 'auto';
 }
 
@@ -892,170 +1105,93 @@ function setupScrollAnimations() {
     });
 }
 
-// Adicionar estilos CSS para animações e notificações via JavaScript
-const additionalStyles = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
+// Função para adicionar estilos CSS dinamicamente
+function addDynamicStyles() {
+    const additionalStyles = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notification-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .result-card {
             opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        to {
-            transform: translateX(0);
+        
+        .result-card.animate-fade-in-up {
             opacity: 1;
+            transform: translateY(0);
         }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
+        
+        @media (max-width: 768px) {
+            .notification {
+                right: 10px !important;
+                left: 10px !important;
+                max-width: none !important;
+                min-width: auto !important;
+            }
         }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
+    `;
     
-    .notification-content {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-weight: 500;
-    }
-    
-    .notification-close {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        padding: 0.5rem;
-        border-radius: 6px;
-        transition: background-color 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .notification-close:hover {
-        background: rgba(255, 255, 255, 0.2);
-    }
-    
-    /* Melhorias para animações de entrada */
-    .result-card {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .result-card.animate-fade-in-up {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    
-    /* Smooth scroll para navegação */
-    html {
-        scroll-behavior: smooth;
-    }
-    
-    /* Melhorias para focus */
-    .search-input:focus,
-    .btn-primary:focus,
-    .btn-secondary:focus,
-    .filter-btn:focus,
-    .suggestion-btn:focus {
-        outline: 2px solid var(--primary-color);
-        outline-offset: 2px;
-    }
-    
-    /* Animação para loading */
-    .loading-overlay {
-        animation: fadeIn 0.3s ease-out;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    /* Melhorias para hover states */
-    .result-card:hover .card-title {
-        color: var(--primary-color);
-    }
-    
-    .step-card:hover .step-icon {
-        transform: scale(1.05);
-    }
-    
-    .feature-card:hover .feature-icon {
-        transform: scale(1.05);
-    }
-    
-    /* Animação para estatísticas */
-    .stat-item:hover .stat-icon {
-        transform: scale(1.1);
-    }
-    
-    /* Melhorias para responsividade */
-    @media (max-width: 768px) {
-        .notification {
-            right: 10px !important;
-            left: 10px !important;
-            max-width: none !important;
-            min-width: auto !important;
-        }
-    }
-`;
-
-// Adicionar estilos ao documento
-const styleSheet = document.createElement('style');
-styleSheet.textContent = additionalStyles;
-document.head.appendChild(styleSheet);
-
-// Função para melhorar performance
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Aplicar debounce ao scroll
-const debouncedHandleScroll = debounce(handleScroll, 10);
-window.removeEventListener('scroll', handleScroll);
-window.addEventListener('scroll', debouncedHandleScroll);
-
-// Preload de imagens importantes
-function preloadImages() {
-    const images = [
-        // Adicionar URLs de imagens importantes aqui se houver
-    ];
-    
-    images.forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
-}
-
-// Chamar preload quando a página carregar
-window.addEventListener('load', preloadImages);
-
-// Service Worker para cache (opcional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // Registrar service worker aqui se necessário
-    });
+    // Adicionar estilos ao documento
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = additionalStyles;
+    document.head.appendChild(styleSheet);
 }
 
 // Melhorias de acessibilidade
 document.addEventListener('keydown', function(e) {
     // Esc para fechar menu mobile
-    if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+    const navMenu = document.querySelector('.nav-menu');
+    if (e.key === 'Escape' && navMenu && navMenu.classList.contains('active')) {
         closeMobileMenu();
+    }
+    
+    // Esc para fechar modal
+    if (e.key === 'Escape' && document.querySelector('.participation-modal.show')) {
+        closeParticipationModal();
     }
     
     // Enter para ativar botões com foco
@@ -1072,13 +1208,30 @@ function isMobile() {
 // Ajustar comportamento baseado no dispositivo
 function adjustForDevice() {
     if (isMobile()) {
-        // Ajustes específicos para mobile
         document.body.classList.add('mobile-device');
     } else {
         document.body.classList.remove('mobile-device');
     }
 }
 
+// Função para melhorar performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Aplicar debounce ao scroll
+const debouncedHandleScroll = debounce(handleScroll, 10);
+window.addEventListener('scroll', debouncedHandleScroll);
+
 // Chamar na inicialização e no resize
 adjustForDevice();
 window.addEventListener('resize', debounce(adjustForDevice, 250));
+
