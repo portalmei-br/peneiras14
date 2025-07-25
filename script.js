@@ -547,7 +547,7 @@ function displayResults(results) {
     });
 }
 
-// FUNÇÃO REFINADA PARA CRIAR CARD DE RESULTADO - DESIGN PROFISSIONAL COM BOTÃO "QUERO PARTICIPAR"
+// FUNÇÃO REFINADA PARA CRIAR CARD DE RESULTADO - DESIGN PROFISSIONAL
 function createResultCard(peneira) {
     const card = document.createElement('div');
     card.className = 'result-card';
@@ -599,14 +599,20 @@ function createResultCard(peneira) {
         
         <div class="card-actions">
             ${peneira.status === 'aberta' ? `
-                <button class="btn-participate" onclick="participateInTryout(${peneira.id})">
-                    <i class="fas fa-futbol"></i>
-                    <span>Quero Participar</span>
+                <button class="btn-primary" onclick="openDirections('${peneira.endereco}')">
+                    <i class="fas fa-route"></i>
+                    <span>Como Chegar</span>
+                </button>
+                <button class="btn-secondary" onclick="shareResult(${peneira.id})">
+                    <i class="fas fa-share-alt"></i>
                 </button>
             ` : `
                 <button class="btn-disabled" disabled>
                     <i class="fas fa-lock"></i>
                     <span>Encerrada</span>
+                </button>
+                <button class="btn-secondary" onclick="shareResult(${peneira.id})">
+                    <i class="fas fa-share-alt"></i>
                 </button>
             `}
         </div>
@@ -723,168 +729,14 @@ function formatDate(dateString) {
     return date.toLocaleDateString('pt-BR', options);
 }
 
-// NOVA FUNÇÃO: Participar da peneira - substitui as funções openDirections e shareResult
-function participateInTryout(peneiraId) {
-    const peneira = peneirasData.find(p => p.id === peneiraId);
-    
-    if (!peneira) {
-        showNotification('Peneira não encontrada.', 'error');
-        return;
-    }
-    
-    // Criar modal de participação
-    const modal = createParticipationModal(peneira);
-    document.body.appendChild(modal);
-    
-    // Mostrar modal com animação
-    setTimeout(() => {
-        modal.classList.add('show');
-    }, 10);
-    
-    // Prevenir scroll do body
-    document.body.style.overflow = 'hidden';
-}
-
-// Função para criar modal de participação
-function createParticipationModal(peneira) {
-    const modal = document.createElement('div');
-    modal.className = 'participation-modal';
-    modal.innerHTML = `
-        <div class="modal-backdrop" onclick="closeParticipationModal()"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-icon">
-                    <i class="fas fa-futbol"></i>
-                </div>
-                <h2>Quero Participar!</h2>
-                <button class="modal-close" onclick="closeParticipationModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="peneira-info">
-                    <h3>${peneira.titulo}</h3>
-                    <p class="clube-name">${peneira.clube}</p>
-                    
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <i class="fas fa-calendar-alt"></i>
-                            <div>
-                                <span class="label">Data e Horário</span>
-                                <span class="value">${formatDate(peneira.data)} às ${peneira.horario}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <div>
-                                <span class="label">Local</span>
-                                <span class="value">${peneira.endereco}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <i class="fas fa-users"></i>
-                            <div>
-                                <span class="label">Categoria</span>
-                                <span class="value">${peneira.categoria}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <i class="fas fa-clipboard-list"></i>
-                            <div>
-                                <span class="label">Requisitos</span>
-                                <span class="value">${peneira.requisitos}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <i class="fas fa-phone"></i>
-                            <div>
-                                <span class="label">Contato</span>
-                                <span class="value">${peneira.contato}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <i class="fas fa-clock"></i>
-                            <div>
-                                <span class="label">Prazo de Inscrição</span>
-                                <span class="value">${formatDate(peneira.prazoInscricao)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="btn-directions" onclick="openDirections('${peneira.endereco}')">
-                        <i class="fas fa-route"></i>
-                        <span>Como Chegar</span>
-                    </button>
-                    
-                    <button class="btn-contact" onclick="contactClub('${peneira.contato}')">
-                        <i class="fas fa-phone"></i>
-                        <span>Entrar em Contato</span>
-                    </button>
-                    
-                    <button class="btn-share" onclick="shareResult(${peneira.id})">
-                        <i class="fas fa-share-alt"></i>
-                        <span>Compartilhar</span>
-                    </button>
-                </div>
-                
-                <div class="important-note">
-                    <i class="fas fa-info-circle"></i>
-                    <p>Lembre-se de entrar em contato com o clube para confirmar sua participação e obter informações sobre documentos necessários.</p>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    return modal;
-}
-
-// Função para fechar modal de participação
-function closeParticipationModal() {
-    const modal = document.querySelector('.participation-modal');
-    if (modal) {
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.remove();
-            document.body.style.overflow = 'auto';
-        }, 300);
-    }
-}
-
-// Função para abrir direções (mantida para uso no modal)
+// Função para abrir direções
 function openDirections(endereco) {
     const encodedAddress = encodeURIComponent(endereco);
     const url = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
     window.open(url, '_blank');
-    showNotification('Abrindo direções no Google Maps...', 'info');
 }
 
-// Função para entrar em contato com o clube
-function contactClub(contato) {
-    // Remover caracteres não numéricos do telefone
-    const phoneNumber = contato.replace(/\D/g, '');
-    
-    // Criar URL do WhatsApp
-    const whatsappUrl = `https://wa.me/55${phoneNumber}?text=Olá! Gostaria de obter mais informações sobre a peneira de futebol.`;
-    
-    // Tentar abrir WhatsApp, senão abrir discador
-    if (navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i)) {
-        window.open(whatsappUrl, '_blank');
-    } else {
-        window.open(`tel:${contato}`, '_blank');
-    }
-    
-    showNotification('Abrindo contato...', 'info');
-}
-
-// Função para compartilhar resultado (mantida e melhorada)
+// Função para compartilhar resultado
 function shareResult(peneiraId) {
     const peneira = peneirasData.find(p => p.id === peneiraId);
     
@@ -896,7 +748,7 @@ function shareResult(peneiraId) {
         }).catch(err => console.log('Erro ao compartilhar:', err));
     } else {
         // Fallback para navegadores que não suportam Web Share API
-        const text = `🏆 Peneira: ${peneira.titulo}\n⚽ Clube: ${peneira.clube}\n📅 Data: ${formatDate(peneira.data)} às ${peneira.horario}\n📍 Local: ${peneira.endereco}\n\n🔗 Veja mais em: ${window.location.href}`;
+        const text = `Peneira: ${peneira.titulo} - ${peneira.clube}\nData: ${formatDate(peneira.data)} às ${peneira.horario}\nLocal: ${peneira.endereco}\n\nVeja mais em: ${window.location.href}`;
         
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => {
@@ -1040,7 +892,7 @@ function setupScrollAnimations() {
     });
 }
 
-// Adicionar estilos CSS para animações, notificações e modal via JavaScript
+// Adicionar estilos CSS para animações e notificações via JavaScript
 const additionalStyles = `
     @keyframes slideInRight {
         from {
@@ -1088,269 +940,6 @@ const additionalStyles = `
         background: rgba(255, 255, 255, 0.2);
     }
     
-    /* Estilos para o novo botão "Quero Participar" */
-    .btn-participate {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        color: var(--text-light);
-        border: none;
-        border-radius: var(--radius-md);
-        padding: var(--space-md) var(--space-lg);
-        font-weight: 600;
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-sm);
-        font-size: var(--font-size-sm);
-        box-shadow: 0 2px 8px rgba(27, 94, 32, 0.3);
-        width: 100%;
-        justify-content: center;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .btn-participate::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
-    }
-    
-    .btn-participate:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(27, 94, 32, 0.4);
-        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-lighter) 100%);
-    }
-    
-    .btn-participate:hover::before {
-        left: 100%;
-    }
-    
-    .btn-participate:active {
-        transform: translateY(0);
-    }
-    
-    /* Estilos para o modal de participação */
-    .participation-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .participation-modal.show {
-        opacity: 1;
-        visibility: visible;
-    }
-    
-    .modal-backdrop {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(4px);
-    }
-    
-    .modal-content {
-        position: relative;
-        background: var(--bg-primary);
-        border-radius: var(--radius-2xl);
-        max-width: 600px;
-        width: 90%;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
-        transform: scale(0.9) translateY(20px);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .participation-modal.show .modal-content {
-        transform: scale(1) translateY(0);
-    }
-    
-    .modal-header {
-        display: flex;
-        align-items: center;
-        gap: var(--space-lg);
-        padding: var(--space-2xl);
-        border-bottom: 1px solid var(--border-light);
-        position: relative;
-    }
-    
-    .modal-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-        border-radius: var(--radius-full);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-light);
-        font-size: var(--font-size-2xl);
-        box-shadow: var(--shadow-md);
-    }
-    
-    .modal-header h2 {
-        flex: 1;
-        font-size: var(--font-size-3xl);
-        font-weight: 800;
-        color: var(--text-primary);
-        margin: 0;
-    }
-    
-    .modal-close {
-        background: none;
-        border: none;
-        color: var(--text-secondary);
-        cursor: pointer;
-        padding: var(--space-sm);
-        border-radius: var(--radius-sm);
-        transition: all var(--transition-fast);
-        font-size: var(--font-size-lg);
-    }
-    
-    .modal-close:hover {
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-    }
-    
-    .modal-body {
-        padding: var(--space-2xl);
-    }
-    
-    .peneira-info h3 {
-        font-size: var(--font-size-2xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-xs);
-    }
-    
-    .clube-name {
-        font-size: var(--font-size-lg);
-        color: var(--primary-color);
-        font-weight: 600;
-        margin-bottom: var(--space-2xl);
-    }
-    
-    .info-grid {
-        display: grid;
-        gap: var(--space-lg);
-        margin-bottom: var(--space-2xl);
-    }
-    
-    .info-item {
-        display: flex;
-        align-items: flex-start;
-        gap: var(--space-lg);
-        padding: var(--space-lg);
-        background: var(--bg-secondary);
-        border-radius: var(--radius-lg);
-        border-left: 4px solid var(--primary-color);
-    }
-    
-    .info-item i {
-        color: var(--primary-color);
-        font-size: var(--font-size-lg);
-        margin-top: 2px;
-        flex-shrink: 0;
-    }
-    
-    .info-item div {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xs);
-        flex: 1;
-    }
-    
-    .info-item .label {
-        font-size: var(--font-size-sm);
-        font-weight: 600;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .info-item .value {
-        font-size: var(--font-size-base);
-        color: var(--text-primary);
-        font-weight: 500;
-    }
-    
-    .action-buttons {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: var(--space-md);
-        margin-bottom: var(--space-2xl);
-    }
-    
-    .btn-directions,
-    .btn-contact,
-    .btn-share {
-        background: transparent;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
-        border-radius: var(--radius-md);
-        padding: var(--space-md) var(--space-lg);
-        font-weight: 600;
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-sm);
-        font-size: var(--font-size-sm);
-        justify-content: center;
-    }
-    
-    .btn-directions:hover,
-    .btn-contact:hover,
-    .btn-share:hover {
-        background: var(--primary-color);
-        color: var(--text-light);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(27, 94, 32, 0.3);
-    }
-    
-    .important-note {
-        display: flex;
-        align-items: flex-start;
-        gap: var(--space-md);
-        padding: var(--space-lg);
-        background: linear-gradient(135deg, rgba(33, 150, 243, 0.05) 0%, rgba(25, 118, 210, 0.05) 100%);
-        border: 1px solid rgba(33, 150, 243, 0.2);
-        border-radius: var(--radius-lg);
-        border-left: 4px solid #2196F3;
-    }
-    
-    .important-note i {
-        color: #2196F3;
-        font-size: var(--font-size-lg);
-        margin-top: 2px;
-        flex-shrink: 0;
-    }
-    
-    .important-note p {
-        color: var(--text-secondary);
-        line-height: var(--leading-relaxed);
-        margin: 0;
-        font-size: var(--font-size-sm);
-    }
-    
     /* Melhorias para animações de entrada */
     .result-card {
         opacity: 0;
@@ -1372,7 +961,6 @@ const additionalStyles = `
     .search-input:focus,
     .btn-primary:focus,
     .btn-secondary:focus,
-    .btn-participate:focus,
     .filter-btn:focus,
     .suggestion-btn:focus {
         outline: 2px solid var(--primary-color);
@@ -1407,85 +995,13 @@ const additionalStyles = `
         transform: scale(1.1);
     }
     
-    /* Responsividade para modal */
+    /* Melhorias para responsividade */
     @media (max-width: 768px) {
-        .modal-content {
-            width: 95%;
-            margin: var(--space-lg);
-        }
-        
-        .modal-header {
-            padding: var(--space-lg);
-            flex-direction: column;
-            text-align: center;
-        }
-        
-        .modal-header h2 {
-            font-size: var(--font-size-2xl);
-        }
-        
-        .modal-body {
-            padding: var(--space-lg);
-        }
-        
-        .action-buttons {
-            grid-template-columns: 1fr;
-        }
-        
-        .info-item {
-            padding: var(--space-md);
-        }
-        
         .notification {
             right: 10px !important;
             left: 10px !important;
             max-width: none !important;
             min-width: auto !important;
-        }
-        
-        .btn-participate {
-            padding: var(--space-sm) var(--space-md);
-            font-size: var(--font-size-xs);
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .modal-icon {
-            width: 50px;
-            height: 50px;
-            font-size: var(--font-size-xl);
-        }
-        
-        .modal-header h2 {
-            font-size: var(--font-size-xl);
-        }
-        
-        .peneira-info h3 {
-            font-size: var(--font-size-xl);
-        }
-        
-        .info-item {
-            padding: var(--space-sm);
-        }
-        
-        .info-item .label {
-            font-size: 0.7rem;
-        }
-        
-        .info-item .value {
-            font-size: var(--font-size-sm);
-        }
-        
-        .btn-directions,
-        .btn-contact,
-        .btn-share {
-            padding: var(--space-sm);
-            font-size: var(--font-size-xs);
-        }
-        
-        .btn-participate {
-            padding: var(--space-xs) var(--space-sm);
-            font-size: 0.7rem;
         }
     }
 `;
@@ -1542,11 +1058,6 @@ document.addEventListener('keydown', function(e) {
         closeMobileMenu();
     }
     
-    // Esc para fechar modal
-    if (e.key === 'Escape' && document.querySelector('.participation-modal.show')) {
-        closeParticipationModal();
-    }
-    
     // Enter para ativar botões com foco
     if (e.key === 'Enter' && document.activeElement.classList.contains('suggestion-btn')) {
         document.activeElement.click();
@@ -1571,4 +1082,3 @@ function adjustForDevice() {
 // Chamar na inicialização e no resize
 adjustForDevice();
 window.addEventListener('resize', debounce(adjustForDevice, 250));
-
