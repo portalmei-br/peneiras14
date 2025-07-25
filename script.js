@@ -666,63 +666,6 @@ function getVagasInfo(peneira) {
     };
 }
 
-// Função refinada para obter informações de prazo
-function getPrazoInfo(peneira) {
-    if (peneira.status !== 'aberta') {
-        return { html: '' };
-    }
-    
-    const diasRestantes = getDiasRestantes(peneira.prazoInscricao);
-    const prazoFormatado = formatDate(peneira.prazoInscricao);
-    
-    return {
-        html: `
-            <div class="deadline-section">
-                <div class="deadline-info">
-                    <i class="fas fa-clock"></i>
-                    <div class="deadline-text">
-                        <span class="deadline-label">Prazo de inscrição</span>
-                        <span class="deadline-date">${prazoFormatado}</span>
-                        <span class="deadline-remaining">${diasRestantes}</span>
-                    </div>
-                </div>
-            </div>
-        `
-    };
-}
-
-// Função para calcular dias restantes
-function getDiasRestantes(prazoInscricao) {
-    const hoje = new Date();
-    const prazo = new Date(prazoInscricao);
-    const diffTime = prazo - hoje;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) {
-        return 'Prazo expirado';
-    } else if (diffDays === 0) {
-        return 'Último dia!';
-    } else if (diffDays === 1) {
-        return 'Termina amanhã';
-    } else if (diffDays <= 7) {
-        return `${diffDays} dias restantes`;
-    } else {
-        return `${diffDays} dias restantes`;
-    }
-}
-
-// Função para formatar data
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const options = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    };
-    return date.toLocaleDateString('pt-BR', options);
-}
-
 // NOVA FUNÇÃO: Participar da peneira - substitui as funções openDirections e shareResult
 function participateInTryout(peneiraId) {
     const peneira = peneirasData.find(p => p.id === peneiraId);
